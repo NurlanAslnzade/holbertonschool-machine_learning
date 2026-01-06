@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""ssds"""
+"""ssds dsajkdjashdjasdjahsd """
 import pandas as pd
 
 
 def from_file(filename, delimiter):
-    """salam"""
+    """salam asdasdasdadadasda"""
     return pd.read_csv(filename, sep=delimiter)
