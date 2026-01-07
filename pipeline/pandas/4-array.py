@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+"""tasd  dksadmas kms"""
+
+
 def array(df):
     """asdasdsadasda sdaasd a"""
     df = df.tail(10)
