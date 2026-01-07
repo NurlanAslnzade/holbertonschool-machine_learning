@@ -4,4 +4,5 @@
 
 def flip_switch(df):
     """asdasdasdas sda"""
-    return df.sort_values(by=['date'], ascending=[False])
+    df.sort_values(by=['date'], ascending=[False])
+    return df.T
