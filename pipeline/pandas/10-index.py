@@ -3,4 +3,6 @@
 
 
 def index(df):
+    """sadasd asadasd"""
     df = df.set_index("Timestamp")
+    return df
