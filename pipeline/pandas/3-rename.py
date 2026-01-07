@@ -6,4 +6,5 @@ def rename(df):
     """"asdasdas dasdasdasdas """"
     df = df.rename(columns = {"Timestamp" : "Datetime"})
     df['Datetime'] = pd.to_datetime(df['Datetime'], unit="s")
-    return df.loc[:, ["Datetime", "Close"]]
+    df.loc[:, ["Datetime", "Close"]]
+    print(df.tail())
