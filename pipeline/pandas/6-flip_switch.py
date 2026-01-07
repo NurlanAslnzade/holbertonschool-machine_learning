@@ -4,5 +4,5 @@
 
 def flip_switch(df):
     """asdasdasdas sda"""
-    df.sort_values(by=['Timestamp'], ascending=[False])
+    df = df.iloc[::-1]
     return df.T
