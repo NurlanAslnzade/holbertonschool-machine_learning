@@ -3,4 +3,5 @@
 
 
 def prune(df):
-    return df = df.dropna(subset=['Close'])
+    """sadasdasdasdasd sdad"""
+    return df.dropna(subset=["Close"])
