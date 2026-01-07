@@ -4,4 +4,4 @@
 
 def slice(df):
     """asdasdsadasda sdaasd a"""
-    return df.loc[["High", "Low", "Close", "Volume_BTC"]].iloc[::60]
+    return df[["High", "Low", "Close", "Volume_BTC"]].iloc[::60]
