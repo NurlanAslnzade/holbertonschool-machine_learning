@@ -5,6 +5,9 @@
 def fill(df):
     """fill dataframe df"""
     df.drop(columns=["Weighted_Price"])
-    df = df["Close"].fillna(method="ffill")
-    df[["High", "Low", "Open"]] = df[["High", "Low", "Open"]].fillna(["Close"])
-    df[["Volume_(BTC)", "Volume_(Currency)"]] = df[["Volume_(BTC)", "Volume_(Currency)"]].fillna(0)
+    df["Close"] = df["Close"].fillna(method="ffill")
+    df["High"] = df["High"].fillna(["Close"])
+    df["Low"] = df["Low"].fillna(["Close"])
+    df["Open"] = df["Open"].fillna(["Close"])
+    df["Volume_(BTC)"] = df["Volume_(BTC)"].fillna(0)
+    df["Volume_(Currency)"] = df["Volume_(Currency)"].fillna(0)
