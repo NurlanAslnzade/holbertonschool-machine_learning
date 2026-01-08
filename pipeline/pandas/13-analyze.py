@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """ssds sadasdasdas"""
-import pandas as pd
 index = __import__('10-index').index
 
 
