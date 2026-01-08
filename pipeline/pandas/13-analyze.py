@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """ssds sadasdasdas"""
-index = __import__('10-index').index
 
 
 def analyze(df):
