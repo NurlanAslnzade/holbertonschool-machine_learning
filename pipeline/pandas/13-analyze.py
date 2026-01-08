@@ -4,5 +4,5 @@
 
 def analyze(df):
     """analyzes df"""
-    df.drop(columns=["Timestamp"])
+    df = df.drop(columns=["Timestamp"])
     return df.describe()
