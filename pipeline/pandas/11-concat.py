@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ssds sadasdasdas"""
 import pandas as pd
-index = import__("10-index").index
+index = __import__('10-index').index
 
 
 def concat(df1, df2):
