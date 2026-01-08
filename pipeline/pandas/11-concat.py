@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+"""ssds sadasdasdas"""
+import pandas as pd
+index = import__("10-index").index
+
+
+def concat(df1, df2):
+    """CCASCASC CASASCAS"""
+    df1 = index(df1)
+    df2 = index(df2)
+    df2 = df2.loc[:, 1417411920]
+    return pd.concat([df1, df2], keys=["coinbase", "bitstamp"])
