@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+"""asdasdasd asd""""
 import numpy as np
 import matplotlib.pyplot as plt
-"""asdada asdasda"""
 
 
 def two():
@@ -13,7 +13,6 @@ def two():
     y1 = np.exp((r / t1) * x)
     y2 = np.exp((r / t2) * x)
     plt.figure(figsize=(6.4, 4.8))
-
     plt.plot(x, y1, "r--", label="C-14", color="red", linestyle="dashed")
     plt.plot(x, y2, "g-", label="Ra-226", color="green", linestyle="solid")
     plt.xlabel("Time (years)")
