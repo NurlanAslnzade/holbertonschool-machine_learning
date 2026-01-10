@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""asdasdasd asd""""
+"""asdasdasd asd"""
 import numpy as np
 import matplotlib.pyplot as plt
 
