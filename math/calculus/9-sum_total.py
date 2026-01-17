@@ -3,10 +3,8 @@
 
 
 def summation_i_squared(n):
-    """
-    sum of i^2
-    """
-    if is not isintance(n, int):
+    """sum  i2"""
+    if type(n) is not int:
         return None
     elif n < 1:
         return None
