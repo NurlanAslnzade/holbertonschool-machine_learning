@@ -1,4 +1,4 @@
-#!/usr/bin/env/ python3
+#!/usr/bin/env python3
 def matrix_shape(matrix):
     a = []
     if isinstance(matrix[0], list):
