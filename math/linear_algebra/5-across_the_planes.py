@@ -10,6 +10,6 @@ def add_matrices2D(mat1, mat2):
     for i in range(len(mat1)):
         new = []
         for k in range(len(mat1[0])):
-            new.append(mat1[k][i] + mat2[k][i])
+            new.append(mat1[i][k] + mat2[i][k])
         new_list.append(new)
     return new_list
