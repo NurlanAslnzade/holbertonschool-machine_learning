@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 def matrix_shape(matrix):
-    a = []
-    if isinstance(matrix[0], list):
-        a.append(len(matrix))
-        a.append(len(matrix[0]))
-        a.append(len(matrix[0][0]))
-    else:
-        a.append(len(matrix))
-        a.append(len(matrix[0]))
-    return a
+    shape = []
+    while isinstance(matrix, list):
+        shape.append(len(matrix))
+        if len(matrix) == 0:
+            break
+        matrix = matrix[0]
+    return shape
