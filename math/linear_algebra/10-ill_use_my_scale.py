@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""asdasda"""
-
-
 def np_shape(matrix):
-    """Murad necesen"""
-    return tuple(len(matrix), np_shape(matrix[0]) if matrix else ())
-
+    dims = []
+    while matrix.ndim > 0:
+        dims.append(matrix.shape[0])
+        matrix = matrix[1:]
+    return tuple(dims)
