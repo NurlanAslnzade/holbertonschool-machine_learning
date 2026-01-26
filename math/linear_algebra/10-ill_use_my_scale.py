@@ -5,4 +5,5 @@ import numpy as np
 
 def np_shape(matrix):
     """Murad necesen"""
-    return matrix.shape
+    return tuple(len(matrix), np_shape(matrix[0]) if matrix else ())
+
