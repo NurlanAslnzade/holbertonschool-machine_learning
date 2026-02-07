@@ -25,10 +25,11 @@ def minor(matrix):
     """
     Computes minor matrix: determinant of each (n-1)x(n-1) submatrix.
     """
-    if not isinstance(matrix, list) or not all(isinstance(row, list)
-                                               for row in matrix):
+    if (not isinstance(matrix, list) or
+        not all(isinstance(row, list) for row in matrix)):
         raise TypeError("matrix must be a list of lists")
-    if not matrix or not all(len(row) == len(matrix) for row in matrix):
+    if (not matrix or
+        not all(len(row) == len(matrix) for row in matrix)):
         raise ValueError("matrix must be a non-empty square matrix")
 
     n = len(matrix)
@@ -37,7 +38,8 @@ def minor(matrix):
         row = []
         for j in range(n):
             # Submatrix excluding row i, column j
-            submatrix = [r[:j] + r[j + 1:] for r in (matrix[:i] + matrix[i + 1:])]
+            submatrix = [r[:j] + r[j + 1:]
+                         for r in (matrix[:i] + matrix[i + 1:])]
             row.append(determinant(submatrix))
         minor_mat.append(row)
     return minor_mat
