@@ -32,15 +32,17 @@ def definiteness(matrix):
     if n != m:
         return None
 
-    # Öz dəyərləri hesablayaq
+    # Yalnız simmetrik matrislər üçün definiteness:
+    if not np.allclose(matrix, matrix.T):
+        return None
+
     try:
         eigvals = np.linalg.eigvals(matrix)
     except Exception:
         return None
 
-    # Kiçik sayısal xətaları sıfıra yaxınlaşdırmaq üçün
     tol = 1e-8
-    eig_real = eigvals.real  # matris realdır, xəyali hissə ~0 olur
+    eig_real = eigvals.real
     eig_real[np.abs(eig_real) < tol] = 0.0
 
     pos = np.any(eig_real > 0)
