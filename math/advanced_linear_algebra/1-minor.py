@@ -41,4 +41,3 @@ def minor(matrix):
             row.append(determinant(submatrix))
         minor_mat.append(row)
     return minor_mat
-
