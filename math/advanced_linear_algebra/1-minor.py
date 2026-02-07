@@ -31,7 +31,7 @@ def minor(matrix):
     if (not matrix or
         not all(len(row) == len(matrix) for row in matrix)):
         raise ValueError("matrix must be a non-empty square matrix")
-
+    
     n = len(matrix)
     minor_mat = []
     for i in range(n):
