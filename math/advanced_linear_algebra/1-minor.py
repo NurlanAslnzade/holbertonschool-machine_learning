@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""
+Module to calculate the determinant of a matrix
+"""
+
+def determinant(mat):
+    """Recursive determinant calculation for square matrix."""
+    n = len(mat)
+    if n == 1:
+        return mat[0][0]
+    if n == 2:
+        return mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1]
+    det = 0
+    for col in range(n):
+        submat = [row[:col] + row[col+1:] for row in mat[1:]]
+        cofactor = ((-1) ** col) * determinant(submat)
+        det += mat[0][col] * cofactor
+    return det
+
+
+def minor(matrix):
+    """
+    Calculates the minor matrix of a given square matrix.
+    
+    Args:
+        matrix: List of lists representing a square matrix.
+    
+    Raises:
+        TypeError: If matrix is not a list of lists.
+        ValueError: If matrix is empty or not square.
+    
+    Returns:
+        The minor matrix (n x n list of lists).
+    """
+    if not isinstance(matrix, list) or not all(isinstance(row, list) for row in matrix):
+        raise TypeError("matrix must be a list of lists")
+    if not matrix or not all(len(row) == len(matrix) for row in matrix):
+        raise ValueError("matrix must be a non-empty square matrix")
+    
+    n = len(matrix)
+    minor_mat = []
+    for i in range(n):
+        row = []
+        for j in range(n):
+            # Submatrix excluding row i and column j
+            submatrix = [row[:j] + row[j+1:] for row in (matrix[:i] + matrix[i+1:])]
+            row.append(determinant(submatrix))
+        minor_mat.append(row)
+    return minor_mat
+
