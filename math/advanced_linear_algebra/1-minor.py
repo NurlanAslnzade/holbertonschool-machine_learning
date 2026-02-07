@@ -39,7 +39,7 @@ def minor(matrix):
         for j in range(n):
             # Submatrix excluding row i, column j
             submatrix = [r[:j] + r[j + 1:]
-            for r in (matrix[:i] + matrix[i + 1:])]
-                row.append(determinant(submatrix))
+                    for r in (matrix[:i] + matrix[i + 1:])]
+                    row.append(determinant(submatrix))
         minor_mat.append(row)
     return minor_mat
