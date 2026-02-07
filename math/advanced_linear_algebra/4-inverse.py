@@ -1,66 +1,67 @@
 #!/usr/bin/env python3
 """
-Module to calculate the inverse of a matrix
+Module to calculate the determinant and inverse of a matrix.
 """
 
 
-def determinant(mat):
-    """Recursive determinant for square matrix mat."""
-    n = len(mat)
-    if n == 0:
-        return 1  # Convention for empty matrix det
+def determinant(matrix):
+    """
+    Calculate the determinant of a square matrix.
+
+    Args:
+        matrix (list[list[int|float]]): Square matrix.
+
+    Returns:
+        int | float: Determinant of the matrix.
+
+    Raises:
+        TypeError: If matrix is not a list of lists.
+        ValueError: If matrix is not a non-empty square matrix.
+    """
+    _validate_matrix(matrix)
+
+    n = len(matrix)
+
     if n == 1:
-        return mat[0][0]
+        return matrix[0][0]
+
     if n == 2:
-        return (mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0])
+        return (matrix[0][0] * matrix[1][1] -
+                matrix[0][1] * matrix[1][0])
+
     det = 0
     for col in range(n):
-        submat = [row[:col] + row[col + 1:] for row in mat[1:]]
-        cofactor = ((-1) ** col) * determinant(submat)
-        det += mat[0][col] * cofactor
+        minor = _minor(matrix, 0, col)
+        det += ((-1) ** col) * matrix[0][col] * determinant(minor)
     return det
 
 
-def adjugate(matrix):
-    """Calculates the adjugate (transpose of cofactor matrix)."""
-    if not isinstance(matrix, list) or not all(
-            isinstance(row, list) for row in matrix):
-        raise TypeError("matrix must be a list of lists")
-    if not matrix or not all(
-            len(row) == len(matrix) for row in matrix):
-        raise ValueError("matrix must be a non-empty square matrix")
-
-    n = len(matrix)
-    adjugate_mat = []
-    for i in range(n):
-        row = []
-        for j in range(n):
-            submatrix = [r[:j] + r[j + 1:]
-                         for r in (matrix[:i] + matrix[i + 1:])]
-            minor_val = determinant(submatrix)
-            sign = 1 if (i + j) % 2 == 0 else -1
-            row.append(sign * minor_val)
-        adjugate_mat.append(row[::-1])  # Reverse row for transpose equiv
-    return adjugate_mat
-
-
 def inverse(matrix):
-    """Calculates matrix inverse using adjugate/determinant formula."""
-    if not isinstance(matrix, list) or not all(
-            isinstance(row, list) for row in matrix):
-        raise TypeError("matrix must be a list of lists")
-    if not matrix or not all(
-            len(row) == len(matrix) for row in matrix):
-        raise ValueError("matrix must be a non-empty square matrix")
+    """
+    Calculate the inverse of a matrix.
+
+    Args:
+        matrix (list[list[int|float]]): Square matrix.
+
+    Returns:
+        list[list[float]] | None: Inverse of matrix,
+        or None if matrix is singular.
+
+    Raises:
+        TypeError: If matrix is not a list of lists.
+        ValueError: If matrix is not a non-empty square matrix.
+    """
+    _validate_matrix(matrix)
 
     det = determinant(matrix)
     if det == 0:
         return None
 
-    adj = adjugate(matrix)
     n = len(matrix)
-    inverse_mat = []
+    adj = _adjoint(matrix)
+
+    inv = []
     for i in range(n):
-        row = [round(adj[i][j] / det, 14) for j in range(n)]
-        inverse_mat.append(row)
-    return inverse_mat
+        row = []
+        for j in range(n):
+            row.append(adj[i]
