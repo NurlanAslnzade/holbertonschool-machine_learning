@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 defines function that converts a one-hot matrix
