@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""script to define a single neurion performing binary classification"""
+
+import numpy as np
+
+
+class Neuron:
+    """class Neuron that defines a single neuron performing binary class."""
+    def __init__(self, nx):
+        """
+        binary classification
+        """
+        if type(nx) is not int:
+            raise TypeError("nx must be an integer")
+        if nx < 1:
+            raise ValueError("nx must be a positive integer")
+        self.W = np.random.randn(nx).reshape(1, nx)
+        self.b = 0
+        self.A = 0
