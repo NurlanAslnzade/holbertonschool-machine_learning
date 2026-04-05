@@ -8,17 +8,20 @@ import numpy as np
 
 def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     """
-    Performs forward propagation over a convolutional layer of a neural network.
+    Performs forward propagation over a convolutional layer.
 
     Args:
         A_prev: numpy.ndarray of shape (m, h_prev, w_prev, c_prev)
                 containing the output of the previous layer.
         W: numpy.ndarray of shape (kh, kw, c_prev, c_new) containing
            the kernels for the convolution.
-        b: numpy.ndarray of shape (1, 1, 1, c_new) containing the biases.
+        b: numpy.ndarray of shape (1, 1, 1, c_new) containing
+           the biases.
         activation: activation function applied to the convolution.
-        padding: string either "same" or "valid" indicating the type of padding.
-        stride: tuple of (sh, sw) containing the strides for the convolution.
+        padding: string either "same" or "valid" indicating the type
+                 of padding.
+        stride: tuple of (sh, sw) containing the strides for the
+                convolution.
 
     Returns:
         The output of the convolutional layer.
@@ -35,13 +38,21 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
         pad_left = pw // 2
         pad_right = pw - pad_left
     elif padding == "valid":
-        pad_top = pad_bottom = pad_left = pad_right = 0
+        pad_top = 0
+        pad_bottom = 0
+        pad_left = 0
+        pad_right = 0
     else:
         raise ValueError("padding must be 'same' or 'valid'")
 
     A_pad = np.pad(
         A_prev,
-        ((0, 0), (pad_top, pad_bottom), (pad_left, pad_right), (0, 0)),
+        (
+            (0, 0),
+            (pad_top, pad_bottom),
+            (pad_left, pad_right),
+            (0, 0)
+        ),
         mode="constant"
     )
 
@@ -56,6 +67,9 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
                 ws = w * sw
                 a_slice = A_pad[i, hs:hs + kh, ws:ws + kw, :]
                 for c in range(c_new):
-                    Z[i, h, w, c] = np.sum(a_slice * W[:, :, :, c]) + float(b[0, 0, 0, c])
+                    Z[i, h, w, c] = (
+                        np.sum(a_slice * W[:, :, :, c]) +
+                        float(b[0, 0, 0, c])
+                    )
 
     return activation(Z)
