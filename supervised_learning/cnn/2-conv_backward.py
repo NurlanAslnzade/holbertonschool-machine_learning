@@ -1,43 +1,95 @@
 #!/usr/bin/env python3
 """
-Pooling forward propagation function
+Convolution backward propagation function
 """
 
 import numpy as np
 
 
-def pool_forward(A_prev, kernel_shape, stride=(1, 1), mode='max'):
+def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     """
-    Performs forward propagation over a pooling layer.
+    Performs back propagation over a convolutional layer.
 
     Args:
+        dZ: numpy.ndarray of shape (m, h_new, w_new, c_new) containing
+            the partial derivatives with respect to the unactivated
+            output of the convolutional layer.
         A_prev: numpy.ndarray of shape (m, h_prev, w_prev, c_prev)
                 containing the output of the previous layer.
-        kernel_shape: tuple of (kh, kw) containing the kernel size.
-        stride: tuple of (sh, sw) containing the strides.
-        mode: string containing either 'max' or 'avg' pooling.
+        W: numpy.ndarray of shape (kh, kw, c_prev, c_new) containing
+           the kernels for the convolution.
+        b: numpy.ndarray of shape (1, 1, 1, c_new) containing the biases.
+        padding: string that is either "same" or "valid" indicating the
+                 type of padding used.
+        stride: tuple of (sh, sw) containing the strides for the
+                convolution.
 
     Returns:
-        The output of the pooling layer.
+        dA_prev, dW, db
+        dA_prev: partial derivatives with respect to the previous layer
+                 of shape (m, h_prev, w_prev, c_prev).
+        dW: partial derivatives with respect to the kernels (same shape
+            as W).
+        db: partial derivatives with respect to the biases of shape
+            (1, 1, 1, c_new).
     """
     m, h_prev, w_prev, c_prev = A_prev.shape
-    kh, kw = kernel_shape
+    kh, kw, _, c_new = W.shape
+    _, h_new, w_new, _ = dZ.shape
     sh, sw = stride
 
-    h_out = (h_prev - kh) // sh + 1
-    w_out = (w_prev - kw) // sw + 1
+    if padding == "same":
+        ph = max((h_prev - 1) * sh + kh - h_prev, 0)
+        pw = max((w_prev - 1) * sw + kw - w_prev, 0)
+        pad_top = ph // 2
+        pad_bottom = ph - pad_top
+        pad_left = pw // 2
+        pad_right = pw - pad_left
+    elif padding == "valid":
+        pad_top = 0
+        pad_bottom = 0
+        pad_left = 0
+        pad_right = 0
+    else:
+        raise ValueError("padding must be 'same' or 'valid'")
 
-    A = np.zeros((m, h_out, w_out, c_prev))
+    A_prev_pad = np.pad(
+        A_prev,
+        (
+            (0, 0),
+            (pad_top, pad_bottom),
+            (pad_left, pad_right),
+            (0, 0)
+        ),
+        mode="constant"
+    )
+    dA_prev_pad = np.zeros_like(A_prev_pad)
+    dW = np.zeros_like(W)
+    db = np.zeros((1, 1, 1, c_new))
 
     for i in range(m):
-        for h in range(h_out):
-            for w in range(w_out):
+        a_prev_pad = A_prev_pad[i]
+        da_prev_pad = dA_prev_pad[i]
+        for h in range(h_new):
+            for w in range(w_new):
                 hs = h * sh
                 ws = w * sw
-                a_slice = A_prev[i, hs:hs + kh, ws:ws + kw, :]
-                if mode == 'max':
-                    A[i, h, w, :] = np.max(a_slice, axis=(0, 1))
-                elif mode == 'avg':
-                    A[i, h, w, :] = np.mean(a_slice, axis=(0, 1))
+                for c in range(c_new):
+                    dz = dZ[i, h, w, c]
+                    a_slice = a_prev_pad[hs:hs + kh, ws:ws + kw, :]
+                    da_prev_pad[hs:hs + kh, ws:ws + kw, :] += W[:, :, :, c] * dz
+                    dW[:, :, :, c] += a_slice * dz
+                    db[0, 0, 0, c] += dz
+        dA_prev_pad[i] = da_prev_pad
 
-    return A
+    if padding == "same":
+        dA_prev = dA_prev_pad[
+            :,
+            pad_top:h_prev + pad_top,
+            pad_left:w_prev + pad_left,
+            :
+        ]
+    else:
+        dA_prev = dA_prev_pad
+
+    return dA_prev, dW, db
