@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-Convolution forward propagation function
+Convolution backward propagation function
 """
 
 import numpy as np
 
 
-def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
+def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     """
-    Performs forward propagation over a convolutional layer.
+    Performs back propagation over a convolutional layer.
     """
     m, h_prev, w_prev, c_prev = A_prev.shape
     kh, kw, _, c_new = W.shape
+    _, h_new, w_new, _ = dZ.shape
     sh, sw = stride
 
     if padding == "same":
@@ -29,7 +30,7 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     else:
         raise ValueError("padding must be 'same' or 'valid'")
 
-    A_pad = np.pad(
+    A_prev_pad = np.pad(
         A_prev,
         (
             (0, 0),
@@ -39,21 +40,35 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
         ),
         mode="constant"
     )
-
-    h_out = (h_prev + pad_top + pad_bottom - kh) // sh + 1
-    w_out = (w_prev + pad_left + pad_right - kw) // sw + 1
-    Z = np.zeros((m, h_out, w_out, c_new))
+    dA_prev_pad = np.zeros_like(A_prev_pad)
+    dW = np.zeros_like(W)
+    db = np.zeros((1, 1, 1, c_new))
 
     for i in range(m):
-        for h in range(h_out):
-            for w in range(w_out):
+        a_prev_pad = A_prev_pad[i]
+        da_prev_pad = dA_prev_pad[i]
+        for h in range(h_new):
+            for w in range(w_new):
                 hs = h * sh
                 ws = w * sw
-                a_slice = A_pad[i, hs:hs + kh, ws:ws + kw, :]
                 for c in range(c_new):
-                    Z[i, h, w, c] = (
-                        np.sum(a_slice * W[:, :, :, c]) +
-                        float(b[0, 0, 0, c])
+                    dz = dZ[i, h, w, c]
+                    a_slice = a_prev_pad[hs:hs + kh, ws:ws + kw, :]
+                    da_prev_pad[hs:hs + kh, ws:ws + kw, :] += (
+                        W[:, :, :, c] * dz
                     )
+                    dW[:, :, :, c] += a_slice * dz
+                    db[0, 0, 0, c] += dz
+        dA_prev_pad[i] = da_prev_pad
 
-    return activation(Z)
+    if padding == "same":
+        dA_prev = dA_prev_pad[
+            :,
+            pad_top:h_prev + pad_top,
+            pad_left:w_prev + pad_left,
+            :
+        ]
+    else:
+        dA_prev = dA_prev_pad
+
+    return dA_prev, dW, db
