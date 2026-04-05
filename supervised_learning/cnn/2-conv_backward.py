@@ -1,40 +1,59 @@
 #!/usr/bin/env python3
 """
-Pooling forward propagation function
+Convolution forward propagation function
 """
 
 import numpy as np
 
 
-def pool_forward(A_prev, kernel_shape, stride=(1, 1), mode='max'):
+def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     """
-    Performs forward propagation over a pooling layer.
-
-    Args:
-        A_prev: numpy.ndarray of shape (m, h_prev, w_prev, c_prev)
-                containing the output of the previous layer.
-        kernel_shape: tuple of (kh, kw) containing the kernel size.
-        stride: tuple of (sh, sw) containing the strides.
-        mode: string containing either 'max' or 'avg' pooling.
-
-    Returns:
-        The output of the pooling layer.
+    Performs forward propagation over a convolutional layer.
     """
     m, h_prev, w_prev, c_prev = A_prev.shape
-    kh, kw = kernel_shape
+    kh, kw, _, c_new = W.shape
     sh, sw = stride
 
-    # Output same spatial size as input, zeros by default
-    A = np.zeros((m, h_prev, w_prev, c_prev))
+    if padding == "same":
+        ph = max((h_prev - 1) * sh + kh - h_prev, 0)
+        pw = max((w_prev - 1) * sw + kw - w_prev, 0)
+        pad_top = ph // 2
+        pad_bottom = ph - pad_top
+        pad_left = pw // 2
+        pad_right = pw - pad_left
+    elif padding == "valid":
+        pad_top = 0
+        pad_bottom = 0
+        pad_left = 0
+        pad_right = 0
+    else:
+        raise ValueError("padding must be 'same' or 'valid'")
 
-    # Slide window with given stride; write result only at window start
+    A_pad = np.pad(
+        A_prev,
+        (
+            (0, 0),
+            (pad_top, pad_bottom),
+            (pad_left, pad_right),
+            (0, 0)
+        ),
+        mode="constant"
+    )
+
+    h_out = (h_prev + pad_top + pad_bottom - kh) // sh + 1
+    w_out = (w_prev + pad_left + pad_right - kw) // sw + 1
+    Z = np.zeros((m, h_out, w_out, c_new))
+
     for i in range(m):
-        for h in range(0, h_prev - kh + 1, sh):
-            for w in range(0, w_prev - kw + 1, sw):
-                a_slice = A_prev[i, h:h + kh, w:w + kw, :]
-                if mode == 'max':
-                    A[i, h, w, :] = np.max(a_slice, axis=(0, 1))
-                elif mode == 'avg':
-                    A[i, h, w, :] = np.mean(a_slice, axis=(0, 1))
+        for h in range(h_out):
+            for w in range(w_out):
+                hs = h * sh
+                ws = w * sw
+                a_slice = A_pad[i, hs:hs + kh, ws:ws + kw, :]
+                for c in range(c_new):
+                    Z[i, h, w, c] = (
+                        np.sum(a_slice * W[:, :, :, c]) +
+                        float(b[0, 0, 0, c])
+                    )
 
-    return A
+    return activation(Z)
