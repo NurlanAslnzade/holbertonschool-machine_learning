@@ -5,7 +5,7 @@ Module for image data augmentation: horizontal flip.
 This module provides a function to flip a 3D TensorFlow tensor horizontally.
 """
 
-impor tensforflow as tf
+impor tensorflow as tf
 
 
  def flip_image(image):
