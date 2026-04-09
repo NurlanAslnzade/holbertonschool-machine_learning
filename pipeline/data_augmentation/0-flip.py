@@ -5,6 +5,7 @@ Module for horizontal image flipping.
 Contains a function to flip a 3D TensorFlow image tensor horizontally.
 """
 
+
 import tensorflow as tf
 
 
@@ -19,6 +20,7 @@ def flip_image(image):
             containing the image to flip.
 
     Returns:
-        tf.Tensor: A 3D tensor of the same shape as `image`, flipped horizontally.
+        tf.Tensor: A 3D tensor of the same shape as `image`,
+            flipped horizontally.
     """
     return tf.image.flip_left_right(image)
