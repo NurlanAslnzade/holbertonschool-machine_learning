@@ -1,43 +1,65 @@
 #!/usr/bin/env python3
-"""A module that does the trick"""
+"""Calculates symmetric P affinities"""
+
+
 import numpy as np
 P_init = __import__('2-P_init').P_init
 HP = __import__('3-entropy').HP
 
 
 def P_affinities(X, tol=1e-5, perplexity=30.0):
-    """A function that does the trick"""
-    (n, d) = X.shape
+    """
+    Calculates the symmetric P affinities
+    of a data set
+    """
+
+    n, d = X.shape
+
     D, P, betas, H = P_init(X, perplexity)
 
-    if n == 0:
-        return P
-
     for i in range(n):
-        row = D[i].copy()
-        row = np.delete(row, i, axis=0)
-        Hi, Pi = HP(row, betas[i])
+
+        # Remove self-distance
+        Di = np.delete(D[i], i)
+
+        # Initial entropy and probabilities
+        Hi, Pi = HP(Di, betas[i, 0])
+
         Hdiff = Hi - H
-        b_max = None
-        b_min = None
+
+        beta_min = None
+        beta_max = None
+
+        # Binary search
         while np.abs(Hdiff) > tol:
+
             if Hdiff > 0:
-                b_min = betas[i, 0]
-                if b_max is None:
-                    betas[i, 0] = betas[i, 0] * 2.
+                beta_min = betas[i, 0]
+
+                if beta_max is None:
+                    betas[i, 0] *= 2.
                 else:
-                    betas[i, 0] = (betas[i, 0] + b_max) / 2.
+                    betas[i, 0] = (
+                        betas[i, 0] + beta_max
+                    ) / 2.
+
             else:
-                b_max = betas[i, 0]
-                if b_min is None:
-                    betas[i, 0] = betas[i, 0] / 2.
+                beta_max = betas[i, 0]
+
+                if beta_min is None:
+                    betas[i, 0] /= 2.
                 else:
-                    betas[i, 0] = (betas[i, 0] + b_min) / 2.
+                    betas[i, 0] = (
+                        betas[i, 0] + beta_min
+                    ) / 2.
 
-            Hi, Pi = HP(row, betas[i])
+            Hi, Pi = HP(Di, betas[i, 0])
             Hdiff = Hi - H
-        Pi = np.insert(Pi, i, 0)
-        P[i] = Pi
 
-    P = (P.T + P) / (2 * n)
+        # Insert 0 probability for self
+        P[i] = np.insert(Pi, i, 0)
+
+    # Symmetrize
+    P = (P + P.T) / (2 * n)
+
     return P
