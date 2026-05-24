@@ -1,66 +1,63 @@
 #!/usr/bin/env python3
-""" M-step: re-estimate all parameters so that
-the likelihood of observing what we observed is maximized
-"""
+"""Maximization step in EM algorithm"""
 
 import numpy as np
 
 
 def maximization(X, g):
     """
-    calculates the maximization step in the EM algorithm for a GMM
+    Calculates the maximization step in the EM algorithm
+    for a GMM
+
     Args:
-        X: numpy.ndarray of shape (n, d) containing the data set
+        X: numpy.ndarray of shape (n, d) containing the dataset
         g: numpy.ndarray of shape (k, n) containing the posterior
            probabilities for each data point in each cluster
-    Returns: pi, m, S, or None, None, None on failure
-             pi: numpy.ndarray of shape (k,) containing the updated priors
-                 for each cluster
-             m: numpy.ndarray of shape (k, d) containing the updated centroid
-                means for each cluster
-             S: numpy.ndarray of shape (k, d, d) containing the updated
-                covariance matrices for each cluster
+
+    Returns:
+        pi, m, S
+
+        pi: numpy.ndarray of shape (k,) containing the updated priors
+        m: numpy.ndarray of shape (k, d) containing the updated means
+        S: numpy.ndarray of shape (k, d, d) containing updated
+           covariance matrices
+
+        Returns None, None, None on failure
     """
+
+    # Validate X
     if not isinstance(X, np.ndarray) or len(X.shape) != 2:
         return None, None, None
-    if not isinstance(g, np.ndarray) or len(X.shape) != 2:
+
+    # Validate g
+    if not isinstance(g, np.ndarray) or len(g.shape) != 2:
         return None, None, None
 
-    gaussian_components = g
-
-    k = gaussian_components.shape[0]
     n, d = X.shape
+    k, n_g = g.shape
 
-    posterior_prob = np.sum(gaussian_components, axis=0)
-    check = np.sum(posterior_prob)
-    if check != X.shape[0]:
+    if n != n_g:
         return None, None, None
 
-    # pi
-    priors = np.zeros((k,))
+    # Check that probabilities sum to 1
+    if not np.allclose(np.sum(g, axis=0), np.ones(n)):
+        return None, None, None
 
-    # m
-    centroid_updated = np.zeros((k, d))
+    # Effective number of points per cluster
+    Nk = np.sum(g, axis=1)
 
-    # S
-    covariance_updated = np.zeros((k, d, d))
+    # Updated priors
+    pi = Nk / n
 
-    # Formula https://bit.ly/31pkdox
+    # Updated means
+    m = np.dot(g, X) / Nk[:, np.newaxis]
+
+    # Updated covariance matrices
+    S = np.zeros((k, d, d))
+
     for i in range(k):
+        diff = X - m[i]
+        weighted_diff = g[i][:, np.newaxis] * diff
+        S[i] = np.dot(weighted_diff.T, diff) / Nk[i]
 
-        # Mu components
-        # Needed to adjust dimensions for fitting the covariance
-        mu_up = np.sum((gaussian_components[i, :, np.newaxis] * X), axis=0)
-        mu_down = np.sum(gaussian_components[i], axis=0)
-        centroid_updated[i] = mu_up / mu_down
-
-        # Sigma components
-        x_m = X - centroid_updated[i]
-        sigma_up = np.matmul(gaussian_components[i] * x_m.T, x_m)
-        sigma_down = np.sum(gaussian_components[i])
-        covariance_updated[i] = sigma_up / sigma_down
-
-        # Pi =  priors after computing derivation of sigma and mu
-        # Formula: P(j) = n(j) / n = Σn i=1 P(j|i) / n
-        priors[i] = np.sum(gaussian_components[i]) / n
-    return priors, centroid_updated, covariance_updated
+    return pi, m, S
