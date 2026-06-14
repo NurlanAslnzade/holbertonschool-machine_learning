@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Wasserstein GAN with Gradient Penalty (WGAN-GP).
+
 This module implements a GAN model using Wasserstein loss
-with gradient penalty to improve training stability.
+and gradient penalty to improve training stability.
 """
 
 import tensorflow as tf
@@ -12,10 +13,8 @@ from tensorflow import keras
 class WGAN_GP(keras.Model):
     """
     WGAN-GP model.
-    Implements Wasserstein GAN with Gradient Penalty.
-    Uses:
-    - Wasserstein loss for generator and discriminator
-    - Gradient penalty for Lipschitz constraint enforcement
+
+    Implements Wasserstein GAN with gradient penalty.
     """
 
     def __init__(
@@ -30,7 +29,6 @@ class WGAN_GP(keras.Model):
         lambda_gp=10
     ):
         """Initialize WGAN-GP model"""
-
         super().__init__()
 
         self.latent_generator = latent_generator
@@ -48,7 +46,7 @@ class WGAN_GP(keras.Model):
 
         self.dims = self.real_examples.shape
         self.len_dims = tf.size(self.dims)
-        self.axis = tf.range(1, self.len_dims, delta=1, dtype='int32')
+        self.axis = tf.range(1, self.len_dims, dtype='int32')
 
         self.scal_shape = self.dims.as_list()
         self.scal_shape[0] = self.batch_size
@@ -75,11 +73,11 @@ class WGAN_GP(keras.Model):
         )
 
         # --------------------
-        # Discriminator loss
+        # Discriminator loss (PEP8 FIXED)
         # --------------------
         self.discriminator.loss = lambda x, y: (
-            tf.reduce_mean(self.discriminator(x, training=True)) -
-            tf.reduce_mean(self.discriminator(y, training=True))
+            tf.reduce_mean(self.discriminator(x, training=True))
+            - tf.reduce_mean(self.discriminator(y, training=True))
         )
 
         self.discriminator.optimizer = keras.optimizers.Adam(
@@ -94,26 +92,25 @@ class WGAN_GP(keras.Model):
         )
 
     def get_fake_sample(self, size=None, training=False):
-        """Generate fake samples from latent space"""
+        """Generate fake samples"""
         if not size:
             size = self.batch_size
         return self.generator(self.latent_generator(size), training=training)
 
     def get_real_sample(self, size=None):
-        """Sample real examples from dataset"""
+        """Get real samples"""
         if not size:
             size = self.batch_size
         idx = tf.random.shuffle(tf.range(tf.shape(self.real_examples)[0]))[:size]
         return tf.gather(self.real_examples, idx)
 
     def get_interpolated_sample(self, real_sample, fake_sample):
-        """Create interpolation between real and fake samples"""
+        """Interpolation between real and fake samples"""
         u = tf.random.uniform(self.scal_shape)
-        v = tf.ones(self.scal_shape) - u
-        return u * real_sample + v * fake_sample
+        return u * real_sample + (1 - u) * fake_sample
 
     def gradient_penalty(self, interpolated_sample):
-        """Compute gradient penalty for WGAN-GP"""
+        """Compute gradient penalty"""
         with tf.GradientTape() as gp_tape:
             gp_tape.watch(interpolated_sample)
             pred = self.discriminator(interpolated_sample, training=True)
@@ -127,18 +124,18 @@ class WGAN_GP(keras.Model):
         return tf.reduce_mean((norm - 1.0) ** 2)
 
     def train_step(self, useless_argument):
-        """Perform one training step"""
+        """One training step"""
 
         for _ in range(self.disc_iter):
 
             with tf.GradientTape() as tape:
 
-                real_sample = self.get_real_sample()
-                fake_sample = self.get_fake_sample(training=True)
+                real = self.get_real_sample()
+                fake = self.get_fake_sample(training=True)
 
-                inter = self.get_interpolated_sample(real_sample, fake_sample)
+                inter = self.get_interpolated_sample(real, fake)
 
-                d_loss = self.discriminator.loss(fake_sample, real_sample)
+                d_loss = self.discriminator.loss(fake, real)
                 gp = self.gradient_penalty(inter)
 
                 total_d_loss = d_loss + self.lambda_gp * gp
@@ -154,8 +151,8 @@ class WGAN_GP(keras.Model):
 
         with tf.GradientTape() as tape:
 
-            fake_sample = self.get_fake_sample(training=True)
-            g_loss = self.generator.loss(fake_sample)
+            fake = self.get_fake_sample(training=True)
+            g_loss = self.generator.loss(fake)
 
         grads = tape.gradient(
             g_loss,
