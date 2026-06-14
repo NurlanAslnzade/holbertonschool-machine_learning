@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Wasserstein GAN with Gradient Penalty (WGAN-GP).
-
 This module implements a GAN model using Wasserstein loss
 with gradient penalty to improve training stability.
 """
@@ -13,7 +12,6 @@ from tensorflow import keras
 class WGAN_GP(keras.Model):
     """
     WGAN-GP model.
-
     Implements Wasserstein GAN with Gradient Penalty.
     Uses:
     - Wasserstein loss for generator and discriminator
