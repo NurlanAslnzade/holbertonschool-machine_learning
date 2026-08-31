@@ -1,34 +1,22 @@
 #!/usr/bin/env python3
-"""Q learning"""
+"""Play a FrozenLake episode using a trained Q-table."""
 
 import numpy as np
 
 
 def play(env, Q, max_steps=100):
-    """
-    play
-    Args:
-        env: is the FrozenLakeEnv instance
-        Q: umpy.ndarray containing the Q-table
-        max_steps: the maximum number of steps in the episode
-    Returns: total rewards for the episode
-    """
-    # reset the state
-    state = env.reset()
-    env.render()
-    done = False
+    """Play one episode by always choosing the highest-valued action."""
+    state, _ = env.reset()
+    total_rewards = 0
+    rendered_outputs = [env.render()]
 
-    for step in range(max_steps):
-        # take the action with maximum expected future reward form the q-table
-        action = np.argmax(Q[state, :])
-        new_state, reward, done, info = env.step(action)
+    for _ in range(max_steps):
+        action = np.argmax(Q[state])
+        state, reward, terminated, truncated, _ = env.step(action)
+        total_rewards += reward
+        rendered_outputs.append(env.render())
 
-        if done is True:
-            env.render()
-            return reward
-        env.render()
-        state = new_state
+        if terminated or truncated:
+            break
 
-    # close the connection to the environment
-    env.close()
-    return reward
+    return total_rewards, rendered_outputs
